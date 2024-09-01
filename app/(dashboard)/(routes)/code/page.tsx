@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Heading } from "@/components/heading";
-import { MessageSquare } from "lucide-react";
+import { Code, MessageSquare } from "lucide-react";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,14 @@ import Loader from "@/components/loader";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
+import ReactMarkdown from "react-markdown";
 
 type ChatMessage = {
   role: "user" | "model";
   content: string;
 };
 
-const ConversationPage = () => {
+const CodePage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const router = useRouter();
 
@@ -44,19 +45,17 @@ const ConversationPage = () => {
       };
       const newMessages = [...messages, userMessage];
 
-      const response = await axios.post("/api/conversation", {
+      const response = await axios.post("/api/code", {
         messages: newMessages,
       });
 
       const formattedResponse: ChatMessage = {
         role: "model",
-        content: response.data.content
-          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-          .replace(/\*(.*?)\*/g, "<em>$1</em>")
-          .replace(/\n/g, "<br/>"),
+        content: response.data.content,
       };
 
       setMessages((current) => [...current, userMessage, formattedResponse]);
+
       form.reset();
     } catch (error: any) {
       console.log(error);
@@ -68,11 +67,11 @@ const ConversationPage = () => {
   return (
     <div>
       <Heading
-        title="Conversation"
-        description="Our most advanced conversation model."
-        icon={MessageSquare}
-        iconColor="text-violet-500"
-        bgColor="bg-violet-500/10"
+        title="Code Generation"
+        description="Our most advanced Code Generation model."
+        icon={Code}
+        iconColor="text-green-700"
+        bgColor="bg-green-700/10"
       />
       <div className="px-4 lg:px-8">
         <div>
@@ -90,7 +89,7 @@ const ConversationPage = () => {
                         {...field}
                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                         disabled={isLoading}
-                        placeholder="Ask something..."
+                        placeholder="Ask to generate Code..."
                       />
                     </FormControl>
                   </FormItem>
@@ -128,10 +127,25 @@ const ConversationPage = () => {
                   )}
                 >
                   {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                  <p
-                    className="text-sm"
-                    dangerouslySetInnerHTML={{ __html: message.content }}
-                  ></p>
+
+                  <ReactMarkdown
+                    components={{
+                      pre: ({ node, ...props }) => (
+                        <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+                          <pre {...props} />
+                        </div>
+                      ),
+                      code: ({ node, ...props }) => (
+                        <code
+                          className="bg-black/10 rounded-lg p-1 font-bold"
+                          {...props}
+                        />
+                      ),
+                    }}
+                    className="text-sm overflow-hidden leading-7"
+                  >
+                    {message.content}
+                  </ReactMarkdown>
                 </div>
               ))}
             </div>
@@ -142,4 +156,4 @@ const ConversationPage = () => {
   );
 };
 
-export default ConversationPage;
+export default CodePage;

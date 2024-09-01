@@ -14,17 +14,14 @@ import { Button } from "@/components/ui/button";
 import { formSchema } from "./constants";
 import { Empty } from "@/components/empty";
 import Loader from "@/components/loader";
-import { cn } from "@/lib/utils";
-import { UserAvatar } from "@/components/user-avatar";
-import { BotAvatar } from "@/components/bot-avatar";
 
-type ChatMessage = {
-  role: "user" | "model";
+type ChatCompletionMessage = {
+  role: "system" | "user" | "assistant";
   content: string;
 };
 
 const ConversationPage = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatCompletionMessage[]>([]);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,7 +35,7 @@ const ConversationPage = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const userMessage: ChatMessage = {
+      const userMessage: ChatCompletionMessage = {
         role: "user",
         content: values.prompt,
       };
@@ -48,16 +45,7 @@ const ConversationPage = () => {
         messages: newMessages,
       });
 
-      const formattedResponse: ChatMessage = {
-        role: "model",
-        content: response.data.content
-          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-          .replace(/\*(.*?)\*/g, "<em>$1</em>")
-          .replace(/\n/g, "<br/>"),
-      };
-
-      setMessages((current) => [...current, userMessage, formattedResponse]);
-      form.reset();
+      setMessages((current) => [...current, userMessage, response.data]);
     } catch (error: any) {
       console.log(error);
     } finally {
@@ -116,25 +104,9 @@ const ConversationPage = () => {
             <Empty label="No Conversation Started" />
           )}
           <div className="flex flex-col-reverse gap-y-4">
-            <div className="flex flex-col-reverse gap-y-4">
-              {messages.map((message, index) => (
-                <div
-                  key={message.content}
-                  className={cn(
-                    "p-8 w-full flex items-start gap-x-8 rounded-lg",
-                    message.role === "user"
-                      ? "bg-white border border-black/10"
-                      : "bg-muted"
-                  )}
-                >
-                  {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                  <p
-                    className="text-sm"
-                    dangerouslySetInnerHTML={{ __html: message.content }}
-                  ></p>
-                </div>
-              ))}
-            </div>
+            {messages.map((message, index) => (
+              <div key={index}>{message.content}</div>
+            ))}
           </div>
         </div>
       </div>
