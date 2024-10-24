@@ -9,8 +9,25 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const instructionMessage = {
   role: "system",
-  content:
-    "You are a code generator. You must answer only in markdown code snippets. Use code comments for explanation. And now give me solution for with explanation of the code as well: ",
+  content: `
+    Generate a daily task list based on the user’s prompt. Each task should be presented in a systematically organized tabular format with the following columns:
+    - **Task Name**: The name of the task.
+    - **Task Description**: A brief description of the task.
+    - **Additional Information**: Any extra details relevant to the task.
+    - **Duration**: How long the task will take.
+    - **Start Time**: The time the task is scheduled to start.
+    - **End Time**: The time the task is scheduled to end.
+    - **Prioritization**: Indicates whether the task is Important or Urgent.
+
+    Format the output as a markdown table with proper spacing and line breaks, for example:
+    | Task Name   | Task Description                | Additional Information       | Duration  | Start Time | End Time | Prioritization |
+    |-------------|---------------------------------|------------------------------|-----------|------------|----------|----------------|
+    | Wake Up     | Get out of bed and start the day|                              | 10 minutes| 6:00 AM    | 6:10 AM  | Important      |
+    | Workout     | Cardio and strength training    | Visit the gym for a 30-minute| 30 minutes| 6:10 AM    | 6:40 AM  | Important      |
+    | Breakfast   | Eat a healthy breakfast         |                              | 15 minutes| 7:30 AM    | 7:45 AM  | Important      |
+
+    Ensure proper spacing and alignment of each row, and break rows onto separate lines.
+  `,
 };
 
 export async function POST(req: Request) {
@@ -29,6 +46,7 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
     const freeTrial = await checkApiLimit();
     if (!freeTrial) {
       return new NextResponse("Free Trial has expired.", { status: 403 });
@@ -40,15 +58,17 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
     await increaseApiLimit();
     const prompt = [instructionMessage, ...messages]
       .map((msg: { content: string }) => msg.content)
       .join("\n");
+
     const result = await model.generateContent(prompt);
 
     return NextResponse.json({
       role: "model",
-      content: result.response.text(),
+      content: result.response.text(), // Ensure the AI response is returned as text
     });
   } catch (error: any) {
     console.error("[Conversation_Error]", error);

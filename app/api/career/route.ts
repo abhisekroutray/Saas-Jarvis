@@ -7,12 +7,6 @@ import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const instructionMessage = {
-  role: "system",
-  content:
-    "You are a code generator. You must answer only in markdown code snippets. Use code comments for explanation. And now give me solution for with explanation of the code as well: ",
-};
-
 export async function POST(req: Request) {
   try {
     const { userId } = auth();
@@ -29,10 +23,6 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-    const freeTrial = await checkApiLimit();
-    if (!freeTrial) {
-      return new NextResponse("Free Trial has expired.", { status: 403 });
-    }
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -40,11 +30,17 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    await increaseApiLimit();
-    const prompt = [instructionMessage, ...messages]
+    const freeTrial = await checkApiLimit();
+    if (!freeTrial) {
+      return new NextResponse("Free Trial has expired.", { status: 403 });
+    }
+
+    const prompt = messages
       .map((msg: { content: string }) => msg.content)
       .join("\n");
     const result = await model.generateContent(prompt);
+
+    await increaseApiLimit();
 
     return NextResponse.json({
       role: "model",

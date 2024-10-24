@@ -4,10 +4,10 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
+  ChartGantt,
   Code,
-  ImageIcon,
   MessageSquare,
-  Music,
+  NotebookPen,
   VideoIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -21,32 +21,32 @@ const tools = [
     href: "/conversation",
   },
   {
-    label: "Music Generation",
-    icon: Music,
-    color: "text-emerald-500",
-    bgColor: "bg-emerald-500/10",
-    href: "/music",
-  },
-  {
-    label: "Image Generation",
-    icon: ImageIcon,
-    color: "text-pink-700",
-    bgColor: "bg-pink-700/10",
-    href: "/image",
-  },
-  {
-    label: "Video Generation",
-    icon: VideoIcon,
-    color: "text-orange-700",
-    bgColor: "bg-orange-700/10",
-    href: "/video",
-  },
-  {
     label: "Code Generation",
     icon: Code,
     color: "text-green-500",
     bgColor: "bg-green-500/10",
     href: "/code",
+  },
+  {
+    label: "Interview Prep",
+    icon: NotebookPen,
+    color: "text-pink-700",
+    bgColor: "bg-pink-700/10",
+    href: "/interview",
+  },
+  {
+    label: "Career Guide",
+    icon: VideoIcon,
+    color: "text-orange-700",
+    bgColor: "bg-orange-700/10",
+    href: "/career",
+  },
+  {
+    label: "Daily Planner",
+    icon: ChartGantt,
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+    href: "/planner",
   },
 ];
 

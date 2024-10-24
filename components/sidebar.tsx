@@ -2,11 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import {
+  ChartGantt,
   Code,
   ImageIcon,
   LayoutDashboard,
   MessageSquare,
   Music,
+  NotebookPen,
   Settings,
   VideoIcon,
 } from "lucide-react";
@@ -14,6 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FreeCounter } from "./free-counter";
 
 const routes = [
   {
@@ -29,37 +32,40 @@ const routes = [
     color: "text-violet-500",
   },
   {
-    label: "Image Generation",
-    icon: ImageIcon,
-    href: "/image",
-    color: "text-pink-700",
-  },
-  {
-    label: "Video generation",
-    icon: VideoIcon,
-    href: "/video",
-    color: "text-orange-700",
-  },
-  {
-    label: "Music generation",
-    icon: Music,
-    href: "/music",
-    color: "text-emerald-500",
-  },
-  {
     label: "Code generation",
     icon: Code,
     href: "/code",
-    color: "text-green-700",
+    color: "text-green-500",
   },
+  {
+    label: "Interview Prep",
+    icon: NotebookPen,
+    href: "/interview",
+    color: "text-pink-500",
+  },
+  {
+    label: "Career Guide",
+    icon: VideoIcon,
+    href: "/career",
+    color: "text-orange-500",
+  },
+  {
+    label: "Daily Planner",
+    icon: ChartGantt,
+    href: "/planner",
+    color: "text-emerald-500",
+  },
+
   {
     label: "Settings",
     icon: Settings,
     href: "/settings",
   },
 ];
-
-const Sidebar = () => {
+interface SidebarProps {
+  apiLimitCount: number;
+}
+const Sidebar = ({ apiLimitCount = 0 }: SidebarProps) => {
   const pathname = usePathname();
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white">
@@ -90,6 +96,7 @@ const Sidebar = () => {
           ))}
         </div>
       </div>
+      <FreeCounter apiLimitCount={apiLimitCount} />
     </div>
   );
 };
