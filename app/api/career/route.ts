@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
 
 // Initialize GoogleGenerativeAI with your API key
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
     const freeTrial = await checkApiLimit();
     if (!freeTrial) {
       return new NextResponse("Free Trial has expired.", { status: 403 });
