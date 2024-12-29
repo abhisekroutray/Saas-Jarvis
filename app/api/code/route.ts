@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubcription } from "@/lib/subscription";
 
 // Initialize GoogleGenerativeAI with your API key
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
@@ -30,17 +31,20 @@ export async function POST(req: Request) {
       );
     }
     const freeTrial = await checkApiLimit();
-    if (!freeTrial) {
+    const isPro = checkSubcription();
+
+    if (!freeTrial && !isPro) {
       return new NextResponse("Free Trial has expired.", { status: 403 });
     }
-
+    if (!isPro) {
+      await increaseApiLimit();
+    }
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
         { error: "Messages are required and should be an array" },
         { status: 400 }
       );
     }
-    await increaseApiLimit();
     const prompt = [instructionMessage, ...messages]
       .map((msg: { content: string }) => msg.content)
       .join("\n");

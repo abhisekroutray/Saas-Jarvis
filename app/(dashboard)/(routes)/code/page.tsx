@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
 import ReactMarkdown from "react-markdown";
+import { userProModal } from "@/hooks/use-pro-modal";
+import toast from "react-hot-toast";
 
 type ChatMessage = {
   role: "user" | "model";
@@ -27,6 +29,7 @@ type ChatMessage = {
 const CodePage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const router = useRouter();
+  const proModal = userProModal();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,7 +61,11 @@ const CodePage = () => {
 
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error?.response?.status === 403) {
+        proModal.onOpen();
+      } else {
+        toast.error("Something Went Wrong");
+      }
     } finally {
       router.refresh();
     }

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import Replicate from "replicate";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubcription } from "@/lib/subscription";
 
 // Initialize GoogleGenerativeAI with your API key
 // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
@@ -34,15 +35,19 @@ export async function POST(req: Request) {
       prompt_b: prompt,
     };
     const freeTrial = await checkApiLimit();
-    if (!freeTrial) {
+    const isPro = checkSubcription();
+
+    if (!freeTrial && !isPro) {
       return new NextResponse("Free Trial has expired.", { status: 403 });
+    }
+    if (!isPro) {
+      await increaseApiLimit();
     }
 
     const response = await replicate.run(
       "riffusion/riffusion:8cf61ea6c56afd61d8f5b9ffd14d7c216c0a93844ce2d82ac1c9ecc9c7f24e05",
       { input }
     );
-    await increaseApiLimit();
     // const prompt = messages.map((msg: { content: string }) => msg.content).join("\n");
     // const result = await model.generateContent(prompt);
 

@@ -1,4 +1,5 @@
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubcription } from "@/lib/subscription";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
@@ -27,8 +28,13 @@ export async function POST(req: Request) {
       return new NextResponse("Resolution is Required");
     }
     const freeTrial = await checkApiLimit();
-    if (!freeTrial) {
+    const isPro = checkSubcription();
+
+    if (!freeTrial && !isPro) {
       return new NextResponse("Free Trial has expired.", { status: 403 });
+    }
+    if (!isPro) {
+      await increaseApiLimit();
     }
 
     const response = await fetch("https://app.imggen.ai/v1/generate-image", {
@@ -43,7 +49,6 @@ export async function POST(req: Request) {
         // You can add more options here based on the imggen.ai API capabilities
       }),
     });
-    await increaseApiLimit();
 
     const output = await response.json();
 

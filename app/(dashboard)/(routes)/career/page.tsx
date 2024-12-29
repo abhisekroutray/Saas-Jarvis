@@ -17,6 +17,7 @@ import Loader from "@/components/loader";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
+import { userProModal } from "@/hooks/use-pro-modal";
 
 type ChatMessage = {
   role: "user" | "model";
@@ -26,6 +27,7 @@ type ChatMessage = {
 const ConversationPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const router = useRouter();
+  const proModal = userProModal();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,7 +61,9 @@ const ConversationPage = () => {
       setMessages((current) => [...current, userMessage, formattedResponse]);
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if (error?.response?.status === 403) {
+        proModal.onOpen();
+      }
     } finally {
       router.refresh();
     }
