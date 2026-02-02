@@ -26,7 +26,7 @@
     "crisp-sdk-web": "^1.0.25",
     "formidable": "^3.5.1",
     "lucide-react": "^0.436.0",
-    "next": "14.2.7",
+    "next": "14.2.35",
     "openai": "^4.57.0",
     "react": "^18",
     "react-dom": "^18",
